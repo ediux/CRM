@@ -186,7 +186,7 @@
           </AssociationSet>
           <EntitySet Name="vw_CustomerSummary" EntityType="CRMModel.vw_CustomerSummary" />
         </EntityContainer>
-        <EntityType Name="vw_CustomerSummary">
+        <EntityType Name="vw_CustomerSummary" Abstract="false">
           <Key>
             <PropertyRef Name="Id" />
             <PropertyRef Name="客戶名稱" />

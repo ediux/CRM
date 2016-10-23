@@ -164,6 +164,13 @@ namespace CRM.Controllers
             return View(db.vw_CustomerSummary.ToList());
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Filiter(string searchFor)
+        {
+            return View("Index", db.客戶資料.Where(w=>w.客戶名稱.Contains(searchFor) && w.是否已刪除==false).ToList());
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

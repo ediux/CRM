@@ -7,8 +7,21 @@
 <h2>Index</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Create New", "Create") | @Html.ActionLink("Summary", "Summary")
 </p>
+<div class="pull-right">
+    @using (Html.BeginForm("Filiter", "CustomerDataManagement", FormMethod.Post, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label class="control-label col-md-3">搜尋:</label>
+            <div class="col-md-4">
+                @Html.TextBox("searchFor","", new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+    }
+
+</div>
 <table class="table">
     <thead>
         <tr>
@@ -65,7 +78,7 @@
     </tbody>
 </table>
 @section pagecss{
-    
+
     @Styles.Render("~/Content/bs/datatable")
 }
 
