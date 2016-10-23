@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="18d61634871d439086afb776c31732b8" Name="Diagram1">
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationGroup" Width="1.5" PointX="0.75" PointY="3.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationGroupTree" Width="2.875" PointX="3" PointY="3.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationUser" Width="1.5" PointX="0.75" PointY="7" IsExpanded="true" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationUserGroup" Width="1.5" PointX="3" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationUserProfile" Width="1.5" PointX="0.625" PointY="13" IsExpanded="true" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationUserProfileRef" Width="1.5" PointX="3" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationUserRole" Width="1.5" PointX="3" PointY="10.875" IsExpanded="true" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationGroupTree_ToApplicationGroup_Child" ManuallyRouted="false" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationGroupTree_ToApplicationGroup_Current" ManuallyRouted="false" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationGroupTree_ToApplicationGroup_Parent" ManuallyRouted="false" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserGroup_ToApplicationGroup" ManuallyRouted="false" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserGroup_ToApplicationUser" ManuallyRouted="false" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserProfileRef_ToApplicationUser" ManuallyRouted="false" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserRole_ToApplicationUser" ManuallyRouted="false" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserProfileRef_ToApplicationUserProfile" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.UserOperationCodeDefine" Width="1.5" PointX="3.75" PointY="13.625" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.UserOperationLog" Width="1.5" PointX="6" PointY="8.25" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_UserOperationLog_ToApplicationUser" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_UserOperationLog_ToUserOperationCodeDefine" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationUserLogin" Width="1.5" PointX="3" PointY="19.875" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserLogin_ToApplicationUser" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationUserClaim" Width="1.5" PointX="3" PointY="16.75" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserClaim_ToApplicationUser" />
+        <EntityTypeShape EntityType="OpenWebSiteModel.ApplicationRole" Width="1.5" PointX="6.375" PointY="1" />
+        <AssociationConnector Association="OpenWebSiteModel.FK_ApplicationUserRole_ToApplicationRole" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -17,7 +17,7 @@ namespace CRM.Controllers
         // GET: CustomerDataManagement
         public ActionResult Index()
         {
-            return View(db.客戶資料.ToList());
+            return View(db.客戶資料.Where(w=>w.是否已刪除==false).ToList());
         }
 
         // GET: CustomerDataManagement/Details/5
@@ -46,11 +46,28 @@ namespace CRM.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email")] 客戶資料 客戶資料)
+        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
-                db.客戶資料.Add(客戶資料);
+                var checkexists = db.客戶資料.Where(w => w.客戶名稱 == 客戶資料.客戶名稱
+                    && w.是否已刪除 == true);
+                if (checkexists.Any())
+                {
+                    var existdata = checkexists.Single();
+                    existdata.是否已刪除 = false;
+                    existdata.Email = 客戶資料.Email;
+                    existdata.地址 = 客戶資料.地址;
+                    existdata.客戶名稱 = 客戶資料.客戶名稱;
+                    existdata.統一編號 = 客戶資料.統一編號;
+                    existdata.傳真 = 客戶資料.傳真;
+                    existdata.電話 = 客戶資料.電話;
+                }
+                else
+                {
+                    db.客戶資料.Add(客戶資料);
+                }
+               
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -78,7 +95,7 @@ namespace CRM.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email")] 客戶資料 客戶資料)
+        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
@@ -109,10 +126,42 @@ namespace CRM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
-            db.客戶資料.Remove(客戶資料);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            try
+            {
+                客戶資料 客戶資料 = db.客戶資料.Find(id);
+
+                if (客戶資料.客戶聯絡人.Any())
+                {
+                    foreach (var 聯絡人 in 客戶資料.客戶聯絡人.Where(w => w.是否已刪除 == false))
+                    {
+                        聯絡人.是否已刪除 = true;
+                        db.Entry<客戶聯絡人>(聯絡人).State = EntityState.Modified;
+                    }
+                }
+                if (客戶資料.客戶銀行資訊.Any())
+                {
+                    foreach (var 客戶銀行 in 客戶資料.客戶銀行資訊.Where(w => w.是否已刪除 == false))
+                    {
+                        客戶銀行.是否已刪除 = true;
+                        db.Entry<客戶銀行資訊>(客戶銀行).State = EntityState.Modified;
+                    }
+                }
+
+                客戶資料.是否已刪除 = true;
+                db.Entry<客戶資料>(客戶資料).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+
+        public ActionResult Summary()
+        {
+            return View(db.vw_CustomerSummary.ToList());
         }
 
         protected override void Dispose(bool disposing)

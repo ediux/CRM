@@ -26,6 +26,20 @@ namespace CRM
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jq/datatable")
+                .Include(
+                "~/Scripts/jquery.dataTables.min.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/bs/datatable")
+            .Include(
+            "~/Scripts/dataTables.bootstrap.min.js"));
+
+            bundles.Add(new StyleBundle("~/Content/jq/datatable")
+                .Include("~/Content/jquery.dataTables.min.css"));
+
+            bundles.Add(new StyleBundle("~/Content/bs/datatable")
+              .Include("~/Content/dataTables.bootstrap.min.css"));
         }
     }
 }
