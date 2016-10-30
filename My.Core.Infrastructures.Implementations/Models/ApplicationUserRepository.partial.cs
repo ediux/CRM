@@ -46,7 +46,7 @@ namespace My.Core.Infrastructures.Implementations.Models
             catch (Exception ex)
             {
                 WriteErrorLog(ex);
-                Task.Run(() => WriteUserOperationLogAsync(OperationCodeEnum.Account_ChangePassword_End_Fail, currentLoginedUser));
+                WriteUserOperationLog(OperationCodeEnum.Account_ChangePassword_End_Fail, currentLoginedUser);
                 throw ex;
             }
         }
@@ -70,7 +70,7 @@ namespace My.Core.Infrastructures.Implementations.Models
             catch (Exception ex)
             {
                 WriteErrorLog(ex);
-                Task.Run(() => WriteUserOperationLogAsync(OperationCodeEnum.Account_ChangePassword_End_Fail, currentLoginedUser));
+                WriteUserOperationLog(OperationCodeEnum.Account_ChangePassword_End_Fail, currentLoginedUser);
                 throw ex;
             }
         }
@@ -96,36 +96,14 @@ namespace My.Core.Infrastructures.Implementations.Models
             catch (Exception ex)
             {
                 WriteErrorLog(ex);
-                Task.Run(() => WriteUserOperationLogAsync(OperationCodeEnum.Account_FindByEmail_End_Fail, currentLoginedUser));
+                WriteUserOperationLog(OperationCodeEnum.Account_FindByEmail_End_Fail, currentLoginedUser);
                 throw ex;
             }
         }
 
-        public async Task<ApplicationUser> FindByEmailAsync(string email)
+        public Task<ApplicationUser> FindByEmailAsync(string email)
         {
-            var currentLoginedUser = getCurrentLoginedUser();
-
-            try
-            {
-
-                IQueryable<ApplicationUser> queryset = ObjectSet.Include(i => i.ApplicationUserProfileRef);
-
-                var result = from q in queryset
-                             from profilerefs in q.ApplicationUserProfileRef
-                             where profilerefs.ApplicationUserProfile.EMail.Equals(email, StringComparison.InvariantCultureIgnoreCase)
-                             && q.Void == false
-                             select q;
-
-                ApplicationUser founduser = result.SingleOrDefault();
-
-                return founduser;
-            }
-            catch (Exception ex)
-            {
-                WriteErrorLog(ex);
-                Task.Run(() => WriteUserOperationLogAsync(OperationCodeEnum.Account_FindByEmail_End_Fail, currentLoginedUser));
-                throw ex;
-            }
+            return Task.Run(() => FindByEmail(email));
         }
 
         public ApplicationUser FindUserById(int MemberId, bool isOnline)
@@ -425,6 +403,43 @@ namespace My.Core.Infrastructures.Implementations.Models
             return base.Get(rtn);
 
         }
+
+        protected virtual void WriteUserOperationLog(OperationCodeEnum code, ApplicationUser User)
+        {
+            try
+            {
+                if (User == null)
+                {
+                    return;
+                }
+
+                string _url = string.Empty;
+                string _body = string.Empty;
+
+                if (System.Web.HttpContext.Current != null)
+                {
+                    _url = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+                    _body = Newtonsoft.Json.JsonConvert.SerializeObject(System.Web.HttpContext.Current.Request.Form);
+                }
+
+                _userOperationLogRepository.Add(new UserOperationLog()
+                {
+                    Body = _body,
+                    UserId = User.Id,
+                    LogTime = DateTime.Now,
+                    OpreationCode = (int)code,
+                    URL = _url
+                });
+
+                UnitOfWork.Commit();                
+
+            }
+            catch (Exception ex)
+            {
+                WriteErrorLog(ex);
+            }
+        }
+
         /// <summary>
         /// Writes the user operation log.
         /// </summary>

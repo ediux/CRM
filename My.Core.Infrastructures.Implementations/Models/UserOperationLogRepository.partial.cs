@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace My.Core.Infrastructures.Implementations.Models
 {
     public partial class UserOperationLogRepository : IUserOperationLogRepository
     {
-        public override void Add(UserOperationLog entity)
+        public override UserOperationLog Add(UserOperationLog entity)
         {
             try
             {
@@ -26,8 +22,9 @@ namespace My.Core.Infrastructures.Implementations.Models
                         OpreationCode = entity.OpreationCode
                     });
                 }
-                base.Add(entity);                
-                UnitOfWork.Commit();                
+                entity = base.Add(entity);
+                UnitOfWork.Commit();
+                return entity;
             }
             catch (Exception)
             {
