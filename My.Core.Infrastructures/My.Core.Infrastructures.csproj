@@ -45,21 +45,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Base\IUnitofWork.cs" />
-    <Compile Include="Base\IRepositoryBase.cs" />
-    <Compile Include="Base\IDataModel.cs" />
-    <Compile Include="Base\IUnitofWorkWithTSQL.cs" />
     <Compile Include="IoC\IDIHost.cs" />
     <Compile Include="Logs\ILogWriter.cs" />
     <Compile Include="Base\IServiceBase.cs" />
-    <Compile Include="Repositories\IApplicationUserRepository.cs" />
-    <Compile Include="Repositories\IApplicationRoleRepository.cs" />
-    <Compile Include="Repositories\IApplicationGroupRepository.cs" />
-    <Compile Include="Repositories\IUserProfileRepository.cs" />
-    <Compile Include="Repositories\IUserOperationCodeDefineRepository.cs" />
-    <Compile Include="Repositories\IUserOperationLogRepository.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />

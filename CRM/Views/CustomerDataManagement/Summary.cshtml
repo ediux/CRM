@@ -4,9 +4,29 @@
     ViewBag.Title = "Summary";
 }
 
-<h2>Summary</h2>
+<h2>@ReslangMUI.Languages.Summary</h2>
 
-<table class="table" id="t">
+<div class="row">
+    <div class="pull-left">
+        <p>
+            @Html.ActionLink(ReslangMUI.Languages.Create_New, "Create") | @Html.ActionLink(ReslangMUI.Languages.Back_to, "Index")
+        </p>
+    </div>
+    <div class="pull-right">
+        @using (Html.BeginForm("FiliterVW", "CustomerDataManagement", FormMethod.Post, new { @class = "form-horizontal" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label class="control-label col-md-3">@ReslangMUI.Languages.Search:</label>
+                <div class="col-md-4">
+                    @Html.TextBox("searchFor", "", new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<table class="table">
     <thead>
         <tr>
             <th>
@@ -25,7 +45,7 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.客戶名稱)
+                    <a href="@Url.Action("Details", "CustomerDataManagement", new { @id=item.Id })">@Html.DisplayFor(modelItem => item.客戶名稱)</a>
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.客戶聯絡人數量)
@@ -36,12 +56,9 @@
             </tr>
         }
     </tbody>
-
-
 </table>
 
 @section pagecss{
-    @Styles.Render("~/Content/jq/datatable")
     @Styles.Render("~/Content/bs/datatable")
 }
 
@@ -50,7 +67,27 @@
     @Scripts.Render("~/bundles/bs/datatable")
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.table').DataTable({ mData: {} });
+            $('.table').DataTable({
+                "paging": true,
+                "ordering": true,
+                "info": true,
+                "dom": '<"row"rt<"row"<"col-lg-3"l><"col-lg-6"p><"col-lg-3"i>>><"clear">',
+                "oLanguage": {
+                    "sProcessing": "@ReslangMUI.Languages.sProcessing",
+                    "sLengthMenu": "@ReslangMUI.Languages.sLengthMenu",
+                    "sZeroRecords": "@ReslangMUI.Languages.sZeroRecords",
+                    "sInfo": "@ReslangMUI.Languages.sInfo",
+                    "sInfoEmpty": "@ReslangMUI.Languages.sInfoEmpty",
+                    "sInfoFiltered": "@ReslangMUI.Languages.sInfoFiltered",
+                    "sSearch": "@ReslangMUI.Languages.sSearch",
+                    "oPaginate": {
+                        "sFirst": "@ReslangMUI.Languages.oPaginate_sFirst",
+                        "sPrevious": "@ReslangMUI.Languages.oPaginate_sPrevious",
+                        "sNext": "@ReslangMUI.Languages.oPaginate_sNext",
+                        "sLast": "@ReslangMUI.Languages.oPaginate_sLast"
+                    }
+                }
+            });
         });
     </script>
 }

@@ -17,7 +17,7 @@ namespace CRM.Controllers
         // GET: CustomerDataManagement
         public ActionResult Index()
         {
-            return View(db.客戶資料.Where(w=>w.是否已刪除==false).ToList());
+            return View(db.客戶資料.Where(w => w.是否已刪除 == false).ToList());
         }
 
         // GET: CustomerDataManagement/Details/5
@@ -67,7 +67,7 @@ namespace CRM.Controllers
                 {
                     db.客戶資料.Add(客戶資料);
                 }
-               
+
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -156,7 +156,7 @@ namespace CRM.Controllers
             {
                 throw ex;
             }
-            
+
         }
 
         public ActionResult Summary()
@@ -168,7 +168,36 @@ namespace CRM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Filiter(string searchFor)
         {
-            return View("Index", db.客戶資料.Where(w=>w.客戶名稱.Contains(searchFor) && w.是否已刪除==false).ToList());
+            int idsearch = 0;
+
+            if (int.TryParse(searchFor, out idsearch) == false)
+                idsearch = 0;
+
+            return View("Index", db.客戶資料.Where(w => (
+                w.Id == idsearch ||
+                w.Email.Contains(searchFor) ||
+                w.客戶名稱.Contains(searchFor) ||
+                w.地址.Contains(searchFor) ||
+                w.客戶名稱.Contains(searchFor) ||
+                w.統一編號.Contains(searchFor) ||
+                w.傳真.Contains(searchFor) ||
+                w.電話.Contains(searchFor))
+                && w.是否已刪除 == false).ToList());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult FiliterVW(string searchFor)
+        {
+            int idsearch = 0;
+
+            if (int.TryParse(searchFor, out idsearch) == false)
+                idsearch = 0;
+
+            return View("Summary", db.vw_CustomerSummary.Where(w => (
+                w.Id == idsearch ||
+                w.客戶名稱.Contains(searchFor) ||
+                w.客戶名稱.Contains(searchFor))).ToList());
         }
 
         protected override void Dispose(bool disposing)

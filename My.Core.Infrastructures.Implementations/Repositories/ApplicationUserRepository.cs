@@ -358,7 +358,7 @@ namespace My.Core.Infrastructures.Implementations
 
                 if (IsOnline)
                 {
-                    //WriteUserOperationLog(OperationCodeEnum.Account_FLAG_Online, currentLoginedUser);
+                    //WriteUserOperationLogAsync(OperationCodeEnum.Account_FLAG_Online, currentLoginedUser);
                     _founduser.LastActivityTime = DateTime.Now;
                     base.Update(_founduser);
                     SaveChanges();
