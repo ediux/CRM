@@ -182,9 +182,11 @@
     <Compile Include="Models\ApplicationUserProfileRefRepository.cs">
       <DependentUpon>Edward.IRepository.EF6.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ApplicationUserProfileRefRepository.partial.cs" />
     <Compile Include="Models\ApplicationUserProfileRepository.cs">
       <DependentUpon>Edward.IRepository.EF6.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ApplicationUserProfileRepository.partial.cs" />
     <Compile Include="Models\ApplicationUserRepository.cs">
       <DependentUpon>Edward.IRepository.EF6.tt</DependentUpon>
     </Compile>

@@ -25,7 +25,7 @@ namespace My.Core.Infrastructures.Implementations.Models
         Task<IQueryable<T>> AllAsync();
 
 		IQueryable<T> Where(Expression<Func<T, bool>> expression);
-		void Add(T entity);
+		T Add(T entity);
 
 		/// <summary>
 		/// Batchs the create.

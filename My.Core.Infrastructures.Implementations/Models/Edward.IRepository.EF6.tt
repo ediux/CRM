@@ -39,7 +39,7 @@ namespace <#= code.VsNamespaceSuggestion() #>
         Task<IQueryable<T>> AllAsync();
 
 		IQueryable<T> Where(Expression<Func<T, bool>> expression);
-		void Add(T entity);
+		T Add(T entity);
 
 		/// <summary>
 		/// Batchs the create.
@@ -171,9 +171,9 @@ namespace <#= code.VsNamespaceSuggestion() #>
 			return ObjectSet.Where(expression);
 		}
 
-		public virtual void Add(T entity)
+		public virtual T Add(T entity)
 		{
-			ObjectSet.Add(entity);
+			return ObjectSet.Add(entity);
 		}
 
 		public virtual void Delete(T entity)

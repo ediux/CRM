@@ -141,13 +141,15 @@ namespace My.Core.Infrastructures.Implementations.Models
         #endregion
 
         #region EMail Stroe
-        public Task<ApplicationUser> FindByEmailAsync(string email)
+        public async Task<ApplicationUser> FindByEmailAsync(string email)
         {
-            return Task<ApplicationUser>.Run(() =>
-            {
-                var findemail = userrolerepo.ApplicationUserRepository.FindByEmail(email);
-                return findemail;
-            });
+            var findemail = await userrolerepo
+                               .ApplicationUserRepository
+                               .ApplicationUserProfileRefRepository
+                               .UserProfileRepository
+                               .FindByEmailAsync(email);
+            return findemail;
+
         }
 
         public Task<string> GetEmailAsync(ApplicationUser user)
@@ -180,12 +182,14 @@ namespace My.Core.Infrastructures.Implementations.Models
 
         public Task SetEmailAsync(ApplicationUser user, string email)
         {
+            //userrolerepo.ApplicationUserRepository.ApplicationUserProfileRefRepository.UserProfileRepository.
             return Task.Run(() =>
             {
                 var useremail = user.ApplicationUserProfileRef.Single();
                 useremail.ApplicationUserProfile.EMail = email;
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
+                useremail.ApplicationUserProfile.LastUpdateTime = DateTime.Now.ToUniversalTime();
+                userrolerepo.UnitOfWork.Context.Entry(useremail).State = EntityState.Modified;
+                userrolerepo.UnitOfWork.Commit();
             });
         }
 
@@ -195,8 +199,9 @@ namespace My.Core.Infrastructures.Implementations.Models
             {
                 var useremail = user.ApplicationUserProfileRef.Single();
                 useremail.ApplicationUserProfile.EMailConfirmed = confirmed;
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
+                useremail.ApplicationUserProfile.LastUpdateTime = DateTime.Now.ToUniversalTime();
+                userrolerepo.UnitOfWork.Context.Entry(useremail).State = EntityState.Modified;
+                userrolerepo.UnitOfWork.Commit();
             });
         }
         #endregion
@@ -232,9 +237,10 @@ namespace My.Core.Infrastructures.Implementations.Models
             {
                 user.AccessFailedCount += 1;
                 user.LastActivityTime = DateTime.Now;
+                userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+                userrolerepo.UnitOfWork.Commit();
+                user = userrolerepo.ApplicationUserRepository.Reload(user);
 
-                user = accountrepo.Update(user);
-                accountrepo.SaveChanges();
                 return user.AccessFailedCount;
             });
         }
@@ -248,9 +254,8 @@ namespace My.Core.Infrastructures.Implementations.Models
 
                 user.LockoutEnabled = false;
                 user.LockoutEndDate = DateTime.Now;
-
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
+                userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+                userrolerepo.UnitOfWork.Commit();
             });
         }
 
@@ -263,8 +268,8 @@ namespace My.Core.Infrastructures.Implementations.Models
                 user.LastUpdateUserId = user.Id;
                 user.LockoutEnabled = enabled;
 
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
+                userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+                userrolerepo.UnitOfWork.Commit();
             });
         }
 
@@ -276,8 +281,8 @@ namespace My.Core.Infrastructures.Implementations.Models
                 user.LastActivityTime = DateTime.Now;
 
                 user.LockoutEndDate = new DateTime(lockoutEnd.Ticks);
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
+                userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+                userrolerepo.UnitOfWork.Commit();
             });
         }
         #endregion
@@ -294,8 +299,8 @@ namespace My.Core.Infrastructures.Implementations.Models
                     UserId = user.Id
                 });
 
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
+                userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+                userrolerepo.UnitOfWork.Commit();
             });
         }
 
@@ -303,7 +308,7 @@ namespace My.Core.Infrastructures.Implementations.Models
         {
             return Task<ApplicationUser>.Run(() =>
             {
-                var founduser = from q in accountrepo.FindAll()
+                var founduser = from q in userrolerepo.ApplicationUserRepository.All()
                                 from l in q.ApplicationUserLogin
                                 where l.LoginProvider == login.LoginProvider
                                 && l.ProviderKey == login.ProviderKey
@@ -317,7 +322,7 @@ namespace My.Core.Infrastructures.Implementations.Models
         {
             return Task<System.Collections.Generic.IList<UserLoginInfo>>.Run(() =>
             {
-                var founduser = from q in accountrepo.FindAll()
+                var founduser = from q in userrolerepo.ApplicationUserRepository.All()
                                 from l in q.ApplicationUserLogin
                                 select l;
 
@@ -326,19 +331,17 @@ namespace My.Core.Infrastructures.Implementations.Models
             });
         }
 
-        public Task RemoveLoginAsync(ApplicationUser user, UserLoginInfo login)
+        public async Task RemoveLoginAsync(ApplicationUser user, UserLoginInfo login)
         {
-            return Task.Run(() =>
-            {
-                var foundlogininfo = (from q in user.ApplicationUserLogin
-                                      where q.LoginProvider == login.LoginProvider
-                                      && q.ProviderKey == login.ProviderKey
-                                      select q).Single();
+            var foundlogininfo = (from q in user.ApplicationUserLogin
+                                  where q.LoginProvider == login.LoginProvider
+                                  && q.ProviderKey == login.ProviderKey
+                                  select q).Single();
 
-                user.ApplicationUserLogin.Remove(foundlogininfo);
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
-            });
+            user.ApplicationUserLogin.Remove(foundlogininfo);
+            userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+            await userrolerepo.UnitOfWork.CommitAsync();
+
         }
         #endregion
 
@@ -363,15 +366,13 @@ namespace My.Core.Infrastructures.Implementations.Models
             });
         }
 
-        public Task SetPasswordHashAsync(ApplicationUser user, string passwordHash)
+        public async Task SetPasswordHashAsync(ApplicationUser user, string passwordHash)
         {
-            return Task.Run(() =>
-            {
-                user.PasswordHash = passwordHash;
-                user.LastActivityTime = user.LastUpdateTime = DateTime.Now.ToUniversalTime();
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
-            });
+            user.PasswordHash = passwordHash;
+            user.LastActivityTime = user.LastUpdateTime = DateTime.Now.ToUniversalTime();
+            userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+            await userrolerepo.UnitOfWork.CommitAsync();
+
         }
         #endregion
 
@@ -397,36 +398,33 @@ namespace My.Core.Infrastructures.Implementations.Models
             });
         }
 
-        public Task SetPhoneNumberAsync(ApplicationUser user, string phoneNumber)
+        public async Task SetPhoneNumberAsync(ApplicationUser user, string phoneNumber)
         {
-            return Task.Run(() =>
-            {
-                var profile = (from q in user.ApplicationUserProfileRef
-                               select q.ApplicationUserProfile).Single();
+            var profile = (from q in user.ApplicationUserProfileRef
+                           select q.ApplicationUserProfile).Single();
 
-                profile.PhoneNumber = phoneNumber;
-                profile.PhoneConfirmed = true;
+            profile.PhoneNumber = phoneNumber;
+            profile.PhoneConfirmed = true;
 
-                if (GetTwoFactorEnabledAsync(user).Result)
-                    profile.PhoneConfirmed = false;
+            if (GetTwoFactorEnabledAsync(user).Result)
+                profile.PhoneConfirmed = false;
 
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
-            });
+            userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+            await userrolerepo.UnitOfWork.CommitAsync();
+
         }
 
-        public Task SetPhoneNumberConfirmedAsync(ApplicationUser user, bool confirmed)
+        public async Task SetPhoneNumberConfirmedAsync(ApplicationUser user, bool confirmed)
         {
-            return Task.Run(() =>
-            {
-                var profile = (from q in user.ApplicationUserProfileRef
-                               select q.ApplicationUserProfile).Single();
+            var profile = (from q in user.ApplicationUserProfileRef
+                           select q.ApplicationUserProfile).Single();
 
-                profile.PhoneConfirmed = confirmed;
+            profile.PhoneConfirmed = confirmed;
 
-                accountrepo.Update(user);
-                accountrepo.SaveChanges();
-            });
+            userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
+            await userrolerepo.UnitOfWork.CommitAsync();
+
+
         }
         #endregion
 

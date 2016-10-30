@@ -34,9 +34,9 @@ namespace My.Core.Infrastructures.Implementations.Models
 			return ObjectSet.Where(expression);
 		}
 
-		public virtual void Add(T entity)
+		public virtual T Add(T entity)
 		{
-			ObjectSet.Add(entity);
+			return ObjectSet.Add(entity);
 		}
 
 		public virtual void Delete(T entity)

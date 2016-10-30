@@ -70,7 +70,7 @@ namespace My.Core.Infrastructures.Implementations.Models
             catch (Exception ex)
             {
                 WriteErrorLog(ex);
-                await WriteUserOperationLogAsync(OperationCodeEnum.Account_ChangePassword_End_Fail, currentLoginedUser);
+                Task.Run(() => WriteUserOperationLogAsync(OperationCodeEnum.Account_ChangePassword_End_Fail, currentLoginedUser));
                 throw ex;
             }
         }
@@ -81,10 +81,10 @@ namespace My.Core.Infrastructures.Implementations.Models
 
             try
             {
-                
+
                 IQueryable<ApplicationUser> queryset = ObjectSet.Include(i => i.ApplicationUserProfileRef);
 
-                var result = from q in ApplicationUserProfileRefRepository.All()                             
+                var result = from q in ApplicationUserProfileRefRepository.All()
                              where q.ApplicationUserProfile.EMail.Equals(email, StringComparison.InvariantCultureIgnoreCase)
                              && q.Void == false
                              select q.ApplicationUser;
@@ -123,7 +123,7 @@ namespace My.Core.Infrastructures.Implementations.Models
             catch (Exception ex)
             {
                 WriteErrorLog(ex);
-                await WriteUserOperationLogAsync(OperationCodeEnum.Account_FindByEmail_End_Fail, currentLoginedUser);
+                Task.Run(() => WriteUserOperationLogAsync(OperationCodeEnum.Account_FindByEmail_End_Fail, currentLoginedUser));
                 throw ex;
             }
         }
@@ -511,7 +511,8 @@ namespace My.Core.Infrastructures.Implementations.Models
 
                 return _applicationUserProfileRefRepository;
             }
-            set {
+            set
+            {
                 _applicationUserProfileRefRepository = value;
                 _applicationUserProfileRefRepository.UnitOfWork = UnitOfWork;
             }
@@ -588,14 +589,7 @@ namespace My.Core.Infrastructures.Implementations.Models
 
         Task<int> ResetPasswordWithTokenAsync(string Token, string newPassword);
 
-        /// <summary>
-        /// Finds the by email.
-        /// </summary>
-        /// <returns>The by email.</returns>
-        /// <param name="email">Email.</param>
-        ApplicationUser FindByEmail(string email);
 
-        Task<ApplicationUser> FindByEmailAsync(string email);
 
         IUserOperationLogRepository UserOperationLogRepository { get; set; }
     }
