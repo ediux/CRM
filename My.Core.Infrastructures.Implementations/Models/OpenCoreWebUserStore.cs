@@ -3,13 +3,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using System.Linq;
-using My.Core.Infrastructures.Implementations.Models;
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
-using My.Core.Infrastructures.DAL;
-using My.Core.Infrastructures.Implementations;
-using My.Core.Infrastructures;
 
 namespace My.Core.Infrastructures.Implementations.Models
 {
@@ -27,41 +23,48 @@ namespace My.Core.Infrastructures.Implementations.Models
         private bool disposed = false;
         SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
 
-        IApplicationUserRoleRepository userrolerepo;
-
+        IApplicationUserRepository userrolerepo;
+        IApplicationRoleRepository rolerepo;
+        IApplicationUserProfileRepository profilerepo;
+        IApplicationUserLoginRepository userloginrepo;
 
         public OpenCoreWebUserStore(DbContext context)
         {
-            userrolerepo = RepositoryHelper.GetApplicationUserRoleRepository();
+            userrolerepo = RepositoryHelper.GetApplicationUserRepository();
             userrolerepo.UnitOfWork.Context = context;
-            userrolerepo.UnitOfWork.ConnectionString = context.Database.Connection.ConnectionString;
+
+            rolerepo = RepositoryHelper.GetApplicationRoleRepository();
+            profilerepo = RepositoryHelper.GetApplicationUserProfileRepository();
+            userloginrepo = RepositoryHelper.GetApplicationUserLoginRepository();
+            userloginrepo.UnitOfWork = profilerepo.UnitOfWork = rolerepo.UnitOfWork = userrolerepo.UnitOfWork;
+
         }
 
         #region 使用者
-        public async Task CreateAsync(ApplicationUser user)
+        public virtual async Task CreateAsync(ApplicationUser user)
         {
-            userrolerepo.ApplicationUserRepository.Add(user);
+            userrolerepo.Add(user);
             await userrolerepo.UnitOfWork.CommitAsync();
         }
 
         public async Task DeleteAsync(ApplicationUser user)
         {
             user.Void = true;
-            userrolerepo.UnitOfWork.Context.Entry<ApplicationUser>(user).State = EntityState.Modified;
+            userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
             await userrolerepo.UnitOfWork.CommitAsync();
         }
 
         public async Task<ApplicationUser> FindByIdAsync(int userId)
         {
-            return await userrolerepo.ApplicationUserRepository.FindUserByIdAsync(userId, false);
+            return await userrolerepo.FindUserByIdAsync(userId, false);
         }
 
         public async Task<ApplicationUser> FindByNameAsync(string userName)
         {
-            return await userrolerepo.ApplicationUserRepository.FindUserByLoginAccountAsync(userName, false);
+            return await userrolerepo.FindUserByLoginAccountAsync(userName, false);
         }
 
-        public async Task UpdateAsync(ApplicationUser user)
+        public virtual async Task UpdateAsync(ApplicationUser user)
         {
             userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
             await userrolerepo.UnitOfWork.CommitAsync();
@@ -95,8 +98,13 @@ namespace My.Core.Infrastructures.Implementations.Models
         #region User Role Store
         public async Task AddToRoleAsync(ApplicationUser user, string roleName)
         {
-            int roleid = userrolerepo.ApplicationRoleRepository.FindByName(roleName).Id;
-            userrolerepo.Add(new ApplicationUserRole() { UserId = user.Id, RoleId = roleid, Void = false });
+            var roleinstance = rolerepo.FindByName(roleName);
+
+            if (roleinstance == null)
+                throw new ArgumentException(string.Format("Role {0} not existed.", roleName), "roleName");
+
+            int roleid = roleinstance.Id;
+            user.ApplicationUserRole.Add(new ApplicationUserRole() { UserId = user.Id, RoleId = roleid, Void = false });
             await userrolerepo.UnitOfWork.CommitAsync();
         }
 
@@ -124,7 +132,7 @@ namespace My.Core.Infrastructures.Implementations.Models
 
         public async Task RemoveFromRoleAsync(ApplicationUser user, string roleName)
         {
-            var role = userrolerepo.ApplicationRoleRepository.FindByName(roleName);
+            var role = rolerepo.FindByName(roleName);
 
             if (role == null)
             {
@@ -143,13 +151,8 @@ namespace My.Core.Infrastructures.Implementations.Models
         #region EMail Stroe
         public async Task<ApplicationUser> FindByEmailAsync(string email)
         {
-            var findemail = await userrolerepo
-                               .ApplicationUserRepository
-                               .ApplicationUserProfileRefRepository
-                               .UserProfileRepository
-                               .FindByEmailAsync(email);
+            var findemail = await profilerepo.FindByEmailAsync(email);
             return findemail;
-
         }
 
         public Task<string> GetEmailAsync(ApplicationUser user)
@@ -231,8 +234,7 @@ namespace My.Core.Infrastructures.Implementations.Models
             user.LastActivityTime = DateTime.Now;
             userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
             await userrolerepo.UnitOfWork.CommitAsync();
-            user = userrolerepo.ApplicationUserRepository.Reload(user);
-
+            user = userrolerepo.Reload(user);
             return user.AccessFailedCount;
 
         }
@@ -285,29 +287,21 @@ namespace My.Core.Infrastructures.Implementations.Models
 
         }
 
-        public Task<ApplicationUser> FindAsync(UserLoginInfo login)
+        public async Task<ApplicationUser> FindAsync(UserLoginInfo login)
         {
-            return Task<ApplicationUser>.Run(() =>
-            {
-                var founduser = from q in userrolerepo.ApplicationUserRepository.All()
-                                from l in q.ApplicationUserLogin
-                                where l.LoginProvider == login.LoginProvider
-                                && l.ProviderKey == login.ProviderKey
-                                select q;
-
-                return founduser.SingleOrDefault();
-            });
+            var founduser = await userloginrepo.GetAsync(login.LoginProvider, login.ProviderKey);
+            if (founduser == null)
+                throw new ArgumentException("User is not found.", "login");
+            return founduser.ApplicationUser;          
         }
 
         public Task<System.Collections.Generic.IList<UserLoginInfo>> GetLoginsAsync(ApplicationUser user)
         {
             return Task.Run(() =>
             {
-                var founduser = from q in userrolerepo.ApplicationUserRepository.All()
-                                from l in q.ApplicationUserLogin
-                                select l;
+                var userlogins = userloginrepo.Where(w => w.UserId == user.Id);
 
-                return (System.Collections.Generic.IList<UserLoginInfo>)(founduser.ToList()
+                return (System.Collections.Generic.IList<UserLoginInfo>)(userlogins.ToList()
                     .ConvertAll(c => new UserLoginInfo(c.LoginProvider, c.ProviderKey)));
             });
         }
@@ -350,6 +344,7 @@ namespace My.Core.Infrastructures.Implementations.Models
         public async Task SetPasswordHashAsync(ApplicationUser user, string passwordHash)
         {
             user.PasswordHash = passwordHash;
+            user.Password = "";
             user.LastActivityTime = user.LastUpdateTime = DateTime.Now.ToUniversalTime();
             userrolerepo.UnitOfWork.Context.Entry(user).State = EntityState.Modified;
             await userrolerepo.UnitOfWork.CommitAsync();
@@ -446,7 +441,7 @@ namespace My.Core.Infrastructures.Implementations.Models
         #region Role Store
         public async Task CreateAsync(ApplicationRole role)
         {
-            userrolerepo.ApplicationRoleRepository.Add(role);
+            rolerepo.Add(role);
             await userrolerepo.UnitOfWork.CommitAsync();
         }
 
@@ -460,7 +455,7 @@ namespace My.Core.Infrastructures.Implementations.Models
         {
             return Task.Run(() =>
             {
-                return userrolerepo.ApplicationRoleRepository.FindById(roleId);
+                return rolerepo.FindById(roleId);
             });
         }
 
@@ -468,7 +463,7 @@ namespace My.Core.Infrastructures.Implementations.Models
         {
             return Task.Run(() =>
             {
-                return userrolerepo.ApplicationRoleRepository.FindByName(roleName);
+                return rolerepo.FindByName(roleName);
             });
         }
 
@@ -482,14 +477,14 @@ namespace My.Core.Infrastructures.Implementations.Models
         #region 可用來查詢的使用者清單屬性
         public System.Linq.IQueryable<ApplicationUser> Users
         {
-            get { return userrolerepo.ApplicationUserRepository.All(); }
+            get { return userrolerepo.All(); }
         }
         #endregion
 
         #region 可用來查詢的角色清單
         public System.Linq.IQueryable<ApplicationRole> Roles
         {
-            get { return userrolerepo.ApplicationRoleRepository.All(); }
+            get { return rolerepo.All(); }
         }
         #endregion
 

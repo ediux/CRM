@@ -14,8 +14,6 @@ namespace My.Core.Infrastructures.Implementations.Models
         private bool _requireuniqueEmail=false;
         public bool RequireUniqueEmail { get { return _requireuniqueEmail; } set { _requireuniqueEmail = value; } }
 
-        private Hashtable _repositories;
-
         public OpenWebSiteEntities(string nameorconnectionstring)
             : base(nameorconnectionstring)
         {

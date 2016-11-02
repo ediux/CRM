@@ -12,19 +12,12 @@ namespace My.Core.Infrastructures.Implementations.Models
         // 此屬性為注入式相依性使用
         // 如無使用DI則會在第一次取用時初始化
         private IUserOperationLogRepository _userOperationLogRepository;
-        public IUserOperationLogRepository UserOperationLogRepository
+        private IApplicationUserProfileRefRepository _applicationUserProfileRefRepository;
+        public ApplicationUserRepository()
         {
-            get
-            {
-                if (_userOperationLogRepository == null)
-                {
-                    _userOperationLogRepository = RepositoryHelper.GetUserOperationLogRepository();
-                    _userOperationLogRepository.UnitOfWork = this.UnitOfWork; //設定使用相同的資料庫連線管理物件
-                }
-
-                return _userOperationLogRepository;
-            }
-            set { _userOperationLogRepository = value; }
+            _userOperationLogRepository = RepositoryHelper.GetUserOperationLogRepository();
+            _applicationUserProfileRefRepository = RepositoryHelper.GetApplicationUserProfileRefRepository();
+            _applicationUserProfileRefRepository.UnitOfWork = _userOperationLogRepository.UnitOfWork = UnitOfWork;            //共用同一個Unit Of Work 管理物件
         }
 
         public ApplicationUser ChangePassword(ApplicationUser UpdatedUserData)
@@ -35,7 +28,7 @@ namespace My.Core.Infrastructures.Implementations.Models
             {
                 Task.Run(() => WriteUserOperationLogAsync(OperationCodeEnum.Account_ChangePassword_Start, currentLoginedUser));
 
-                UnitOfWork.Context.Entry<ApplicationUser>(UpdatedUserData).State = System.Data.Entity.EntityState.Modified;
+                UnitOfWork.Context.Entry(UpdatedUserData).State = EntityState.Modified;
 
                 UnitOfWork.Commit();
 
@@ -81,13 +74,13 @@ namespace My.Core.Infrastructures.Implementations.Models
 
             try
             {
+                IQueryable<ApplicationUser> queryset = All().Include(i => i.ApplicationUserProfileRef);
 
-                IQueryable<ApplicationUser> queryset = ObjectSet.Include(i => i.ApplicationUserProfileRef);
-
-                var result = from q in ApplicationUserProfileRefRepository.All()
-                             where q.ApplicationUserProfile.EMail.Equals(email, StringComparison.InvariantCultureIgnoreCase)
+                var result = from q in queryset
+                             from u in q.ApplicationUserProfileRef                             
+                             where u.ApplicationUserProfile.EMail.Equals(email, StringComparison.InvariantCultureIgnoreCase)
                              && q.Void == false
-                             select q.ApplicationUser;
+                             select q;
 
                 ApplicationUser founduser = result.SingleOrDefault();
 
@@ -431,7 +424,7 @@ namespace My.Core.Infrastructures.Implementations.Models
                     URL = _url
                 });
 
-                UnitOfWork.Commit();                
+                UnitOfWork.Commit();
 
             }
             catch (Exception ex)
@@ -513,30 +506,12 @@ namespace My.Core.Infrastructures.Implementations.Models
         }
         #endregion
 
-        private IApplicationUserProfileRefRepository _applicationUserProfileRefRepository;
-        public IApplicationUserProfileRefRepository ApplicationUserProfileRefRepository
-        {
-            get
-            {
-                if (_applicationUserProfileRefRepository == null)
-                {
-                    _applicationUserProfileRefRepository = RepositoryHelper.GetApplicationUserProfileRefRepository();
-                    _applicationUserProfileRefRepository.UnitOfWork = UnitOfWork;
-                }
 
-                return _applicationUserProfileRefRepository;
-            }
-            set
-            {
-                _applicationUserProfileRefRepository = value;
-                _applicationUserProfileRefRepository.UnitOfWork = UnitOfWork;
-            }
-        }
     }
 
     public partial interface IApplicationUserRepository : IRepositoryBase<ApplicationUser>
     {
-        IApplicationUserProfileRefRepository ApplicationUserProfileRefRepository { get; set; }
+
         /// <summary>
         /// 變更密碼
         /// </summary>
@@ -604,8 +579,5 @@ namespace My.Core.Infrastructures.Implementations.Models
 
         Task<int> ResetPasswordWithTokenAsync(string Token, string newPassword);
 
-
-
-        IUserOperationLogRepository UserOperationLogRepository { get; set; }
     }
 }
