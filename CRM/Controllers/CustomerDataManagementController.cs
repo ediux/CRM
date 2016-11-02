@@ -12,12 +12,19 @@ namespace CRM.Controllers
 {
     public class CustomerDataManagementController : Controller
     {
-        private CRMEntities db = new CRMEntities();
+        //private CRMEntities db = new CRMEntities();
+        private I客戶資料Repository db;
+        private Ivw_CustomerSummaryRepository db_vw;
+        public CustomerDataManagementController()
+        {
+            db = RepositoryHelper.Get客戶資料Repository();
+            db_vw = RepositoryHelper.Getvw_CustomerSummaryRepository();
+        }
 
         // GET: CustomerDataManagement
         public ActionResult Index()
         {
-            return View(db.客戶資料.Where(w => w.是否已刪除 == false).ToList());
+            return View(db.Where(w => w.是否已刪除 == false).ToList());
         }
 
         // GET: CustomerDataManagement/Details/5
@@ -27,7 +34,7 @@ namespace CRM.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = db.Get(id);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -50,7 +57,7 @@ namespace CRM.Controllers
         {
             if (ModelState.IsValid)
             {
-                var checkexists = db.客戶資料.Where(w => w.客戶名稱 == 客戶資料.客戶名稱
+                var checkexists = db.Where(w => w.客戶名稱 == 客戶資料.客戶名稱
                     && w.是否已刪除 == true);
                 if (checkexists.Any())
                 {
@@ -65,10 +72,10 @@ namespace CRM.Controllers
                 }
                 else
                 {
-                    db.客戶資料.Add(客戶資料);
+                    db.Add(客戶資料);
                 }
 
-                db.SaveChanges();
+                db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
 
@@ -82,7 +89,7 @@ namespace CRM.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = db.Get(id);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -99,8 +106,8 @@ namespace CRM.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(客戶資料).State = EntityState.Modified;
-                db.SaveChanges();
+                db.UnitOfWork.Context.Entry(客戶資料).State = EntityState.Modified;
+                db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
             return View(客戶資料);
@@ -113,7 +120,7 @@ namespace CRM.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = db.Get(id);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -128,14 +135,14 @@ namespace CRM.Controllers
         {
             try
             {
-                客戶資料 客戶資料 = db.客戶資料.Find(id);
+                客戶資料 客戶資料 = db.Get(id);
 
                 if (客戶資料.客戶聯絡人.Any())
                 {
                     foreach (var 聯絡人 in 客戶資料.客戶聯絡人.Where(w => w.是否已刪除 == false))
                     {
                         聯絡人.是否已刪除 = true;
-                        db.Entry<客戶聯絡人>(聯絡人).State = EntityState.Modified;
+                        db.UnitOfWork.Context.Entry(聯絡人).State = EntityState.Modified;
                     }
                 }
                 if (客戶資料.客戶銀行資訊.Any())
@@ -143,13 +150,13 @@ namespace CRM.Controllers
                     foreach (var 客戶銀行 in 客戶資料.客戶銀行資訊.Where(w => w.是否已刪除 == false))
                     {
                         客戶銀行.是否已刪除 = true;
-                        db.Entry<客戶銀行資訊>(客戶銀行).State = EntityState.Modified;
+                        db.UnitOfWork.Context.Entry(客戶銀行).State = EntityState.Modified;
                     }
                 }
 
                 客戶資料.是否已刪除 = true;
-                db.Entry<客戶資料>(客戶資料).State = EntityState.Modified;
-                db.SaveChanges();
+                db.UnitOfWork.Context.Entry(客戶資料).State = EntityState.Modified;
+                db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -161,7 +168,7 @@ namespace CRM.Controllers
 
         public ActionResult Summary()
         {
-            return View(db.vw_CustomerSummary.ToList());
+            return View(db_vw.All().ToList());
         }
 
         [HttpPost]
@@ -173,7 +180,7 @@ namespace CRM.Controllers
             if (int.TryParse(searchFor, out idsearch) == false)
                 idsearch = 0;
 
-            return View("Index", db.客戶資料.Where(w => (
+            return View("Index", db.Where(w => (
                 w.Id == idsearch ||
                 w.Email.Contains(searchFor) ||
                 w.客戶名稱.Contains(searchFor) ||
@@ -194,7 +201,7 @@ namespace CRM.Controllers
             if (int.TryParse(searchFor, out idsearch) == false)
                 idsearch = 0;
 
-            return View("Summary", db.vw_CustomerSummary.Where(w => (
+            return View("Summary", db_vw.Where(w => (
                 w.Id == idsearch ||
                 w.客戶名稱.Contains(searchFor) ||
                 w.客戶名稱.Contains(searchFor))).ToList());

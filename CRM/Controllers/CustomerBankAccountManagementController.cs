@@ -12,7 +12,13 @@ namespace CRM.Controllers
 {
     public class CustomerBankAccountManagementController : Controller
     {
-        private CRMEntities db = new CRMEntities();
+        //private CRMEntities db = new CRMEntities();
+        private I客戶銀行資訊Repository db;
+
+        public CustomerBankAccountManagementController()
+        {
+            db = RepositoryHelper.Get客戶銀行資訊Repository();
+        }
 
         // GET: CustomerBankAccountManagement
         public ActionResult Index(int? id, string returnUrl,string returnTitle)
@@ -21,12 +27,19 @@ namespace CRM.Controllers
             {
                 ViewBag.ReturnUrl = returnUrl;
                 ViewBag.ReturnTitle = returnTitle;
-                var 客戶銀行資訊byId = db.客戶銀行資訊.Include(客 => 客.客戶資料);
-                return View(客戶銀行資訊byId.Where(w => w.是否已刪除 == false && w.客戶Id == id).OrderBy(o => o.Id).ToList());
+                var 客戶銀行資訊byId = db.Where(w => w.是否已刪除 == false 
+                    && w.客戶Id == id)
+                    .Include(客 => 客.客戶資料)
+                    .OrderBy(o => o.Id);
+
+                return View(客戶銀行資訊byId.ToList());
             }
 
-            var 客戶銀行資訊 = db.客戶銀行資訊.Include(客 => 客.客戶資料);
-            return View(客戶銀行資訊.Where(w => w.是否已刪除 == false).OrderBy(o => o.Id).ToList());
+            var 客戶銀行資訊 = db.Where(w => w.是否已刪除 == false)
+                .OrderBy(o => o.Id)
+                .Include(客 => 客.客戶資料);
+
+            return View(客戶銀行資訊.ToList());
         }
 
         // GET: CustomerBankAccountManagement/Details/5
@@ -36,7 +49,8 @@ namespace CRM.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶銀行資訊 客戶銀行資訊 = db.客戶銀行資訊.Find(id);
+            客戶銀行資訊 客戶銀行資訊 = db.Get(id);
+
             if (客戶銀行資訊 == null)
             {
                 return HttpNotFound();
@@ -47,7 +61,8 @@ namespace CRM.Controllers
         // GET: CustomerBankAccountManagement/Create
         public ActionResult Create()
         {
-            ViewBag.客戶Id = new SelectList(db.客戶資料.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶名稱), "Id", "客戶名稱");
+            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false)
+                .OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱");
             return View();
         }
 
@@ -60,12 +75,12 @@ namespace CRM.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.客戶銀行資訊.Add(客戶銀行資訊);
-                db.SaveChanges();
+                db.Add(客戶銀行資訊);
+                db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.客戶Id = new SelectList(db.客戶資料.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶名稱), "Id", "客戶名稱", 客戶銀行資訊.客戶Id);
+            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶銀行資訊.客戶Id);
             return View(客戶銀行資訊);
         }
 
@@ -76,12 +91,12 @@ namespace CRM.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶銀行資訊 客戶銀行資訊 = db.客戶銀行資訊.Find(id);
+            客戶銀行資訊 客戶銀行資訊 = db.Get(id);
             if (客戶銀行資訊 == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.客戶Id = new SelectList(db.客戶資料.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶名稱), "Id", "客戶名稱", 客戶銀行資訊.客戶Id);
+            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶銀行資訊.客戶Id);
             return View(客戶銀行資訊);
         }
 
@@ -94,11 +109,12 @@ namespace CRM.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(客戶銀行資訊).State = EntityState.Modified;
-                db.SaveChanges();
+                db.UnitOfWork.Context.Entry(客戶銀行資訊).State = EntityState.Modified;
+                db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-            ViewBag.客戶Id = new SelectList(db.客戶資料.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶名稱), "Id", "客戶名稱", 客戶銀行資訊.客戶Id);
+            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false)
+                .OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶銀行資訊.客戶Id);
             return View(客戶銀行資訊);
         }
 
@@ -109,7 +125,7 @@ namespace CRM.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶銀行資訊 客戶銀行資訊 = db.客戶銀行資訊.Find(id);
+            客戶銀行資訊 客戶銀行資訊 = db.Get(id);
             if (客戶銀行資訊 == null)
             {
                 return HttpNotFound();
@@ -122,10 +138,10 @@ namespace CRM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            客戶銀行資訊 客戶銀行資訊 = db.客戶銀行資訊.Find(id);
+            客戶銀行資訊 客戶銀行資訊 = db.Get(id);
             客戶銀行資訊.是否已刪除 = true;
             //db.客戶銀行資訊.Remove(客戶銀行資訊);
-            db.SaveChanges();
+            db.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
         [HttpPost]
@@ -137,7 +153,7 @@ namespace CRM.Controllers
             if (int.TryParse(searchFor, out idsearch) == false)
                 idsearch = 0;
 
-            return View("Index", db.客戶銀行資訊.Where(w => (
+            return View("Index", db.Where(w => (
                 w.Id == idsearch ||
                 w.分行代碼 == idsearch ||
                 w.帳戶名稱.Contains(searchFor) ||
