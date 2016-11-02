@@ -181,7 +181,7 @@ namespace CRM.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> ConfirmEmail(int userId, string code)
         {
-            if (userId == null || code == null)
+            if (userId <= 0 || code == null)
             {
                 return View("Error");
             }
@@ -292,7 +292,7 @@ namespace CRM.Controllers
         public async Task<ActionResult> SendCode(string returnUrl, bool rememberMe)
         {
             var userId = await SignInManager.GetVerifiedUserIdAsync();
-            if (userId == null)
+            if (userId <= 0)
             {
                 return View("Error");
             }
@@ -413,7 +413,7 @@ namespace CRM.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "CustomerDataManagement");
         }
 
         //
@@ -470,7 +470,7 @@ namespace CRM.Controllers
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "CustomerDataManagement");
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult
