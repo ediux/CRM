@@ -29,5 +29,6 @@ namespace CRM.Models
         public virtual DbSet<客戶銀行資訊> 客戶銀行資訊 { get; set; }
         public virtual DbSet<客戶聯絡人> 客戶聯絡人 { get; set; }
         public virtual DbSet<vw_CustomerSummary> vw_CustomerSummary { get; set; }
+        public virtual DbSet<客戶分類對照表> 客戶分類對照表 { get; set; }
     }
 }

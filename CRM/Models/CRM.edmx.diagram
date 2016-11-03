@@ -5,12 +5,14 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="e98f62574d7e40e68d068bc9984991a2" Name="Diagram1">
-        <EntityTypeShape EntityType="CRMModel.客戶資料" Width="1.5" PointX="0.75" PointY="2.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="CRMModel.客戶資料" Width="1.5" PointX="3" PointY="8.5" IsExpanded="true" />
         <EntityTypeShape EntityType="CRMModel.客戶銀行資訊" Width="1.5" PointX="3" PointY="1.125" IsExpanded="true" />
         <EntityTypeShape EntityType="CRMModel.客戶聯絡人" Width="1.5" PointX="3" PointY="4.375" IsExpanded="true" />
         <AssociationConnector Association="CRMModel.FK_客戶銀行資訊_客戶資料" ManuallyRouted="false" />
         <AssociationConnector Association="CRMModel.FK_客戶聯絡人_客戶資料" ManuallyRouted="false" />
         <EntityTypeShape EntityType="CRMModel.vw_CustomerSummary" Width="1.5" PointX="5.375" PointY="0.75" />
+        <EntityTypeShape EntityType="CRMModel.客戶分類對照表" Width="1.5" PointX="0.75" PointY="9.375" />
+        <AssociationConnector Association="CRMModel.FK_客戶資料_客戶分類對照表" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

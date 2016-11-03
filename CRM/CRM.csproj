@@ -164,6 +164,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CustomerBankAccountManagementController.cs" />
+    <Compile Include="Controllers\CustomerClassificationController.cs" />
     <Compile Include="Controllers\CustomerContactManagementController.cs" />
     <Compile Include="Controllers\CustomerDataManagementController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -214,6 +215,15 @@
       <DependentUpon>EFGeneratePartialClass.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\vw_CustomerSummaryRepository.cs">
+      <DependentUpon>Edward.IRepository.EF6.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\客戶分類對照表.cs">
+      <DependentUpon>CRM.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\客戶分類對照表.Partial.cs">
+      <DependentUpon>EFGeneratePartialClass.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\客戶分類對照表Repository.cs">
       <DependentUpon>Edward.IRepository.EF6.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\客戶聯絡人.cs">
@@ -378,6 +388,11 @@
     <Content Include="Views\CustomerBankAccountManagement\Edit.cshtml" />
     <Content Include="Views\CustomerBankAccountManagement\Index.cshtml" />
     <Content Include="Views\CustomerDataManagement\Summary.cshtml" />
+    <Content Include="Views\CustomerClassification\Create.cshtml" />
+    <Content Include="Views\CustomerClassification\Delete.cshtml" />
+    <Content Include="Views\CustomerClassification\Details.cshtml" />
+    <Content Include="Views\CustomerClassification\Edit.cshtml" />
+    <Content Include="Views\CustomerClassification\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

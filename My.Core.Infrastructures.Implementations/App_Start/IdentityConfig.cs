@@ -79,8 +79,11 @@ namespace My.Core.Infrastructures.Implementations
 
                 user.Password = password;
                 user.PasswordHash = PasswordHasher.HashPassword(password);
+                await Store.CreateAsync(user);
+                user = await Store.FindByNameAsync(user.UserName);
+
                 user.ResetPasswordToken = await GeneratePasswordResetTokenAsync(user.Id);
-                await base.CreateAsync(user);
+                
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -106,6 +109,7 @@ namespace My.Core.Infrastructures.Implementations
 
         }
 
+        
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
 
