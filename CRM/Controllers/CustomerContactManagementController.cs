@@ -27,15 +27,13 @@ namespace CRM.Controllers
             {
                 ViewBag.ReturnUrl = returnUrl;
                 ViewBag.ReturnTitle = returnTitle;
-                var 客戶聯絡人byId = db.Where(w => w.是否已刪除==false &&
-                    w.客戶Id==id)
-                    .Include(客 => 客.客戶資料)
-                    .OrderBy(o => o.客戶Id);
+                var 客戶聯絡人byId = db.All()
+                    .Where(w=>w.客戶資料.Id==id);
 
                 return View(客戶聯絡人byId.ToList());
             }
-            var 客戶聯絡人 = db.Where(w=>w.是否已刪除==false).Include(客 => 客.客戶資料).OrderBy(o=>o.客戶Id);
-            return View(客戶聯絡人.ToList());
+            var 客戶聯絡人 = db.All().ToList();
+            return View(客戶聯絡人);
         }
 
         // GET: CustomerContactManagement/Details/5
@@ -57,7 +55,7 @@ namespace CRM.Controllers
         // GET: CustomerContactManagement/Create
         public ActionResult Create()
         {
-            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o=>o.客戶資料.客戶名稱), "Id", "客戶名稱");
+            ViewBag.客戶Id = new SelectList(db.Where(w => w.客戶資料.是否已刪除 == false).OrderBy(o=>o.客戶資料.客戶名稱), "Id", "客戶名稱");
             return View();
         }
 
