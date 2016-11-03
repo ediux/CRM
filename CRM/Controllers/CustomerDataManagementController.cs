@@ -14,11 +14,13 @@ namespace CRM.Controllers
     {
         //private CRMEntities db = new CRMEntities();
         private I客戶資料Repository db;
+        private I客戶分類對照表Repository db_class;
         private Ivw_CustomerSummaryRepository db_vw;
         public CustomerDataManagementController()
         {
             db = RepositoryHelper.Get客戶資料Repository();
-            db_vw = RepositoryHelper.Getvw_CustomerSummaryRepository();
+            db_vw = RepositoryHelper.Getvw_CustomerSummaryRepository(db.UnitOfWork);
+            db_class = RepositoryHelper.Get客戶分類對照表Repository(db.UnitOfWork);
         }
 
         // GET: CustomerDataManagement
@@ -45,7 +47,8 @@ namespace CRM.Controllers
         // GET: CustomerDataManagement/Create
         public ActionResult Create()
         {
-            return View();
+            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "客戶分類ID", "客戶分類");
+            return View(new 客戶資料());
         }
 
         // POST: CustomerDataManagement/Create
@@ -57,28 +60,11 @@ namespace CRM.Controllers
         {
             if (ModelState.IsValid)
             {
-                var checkexists = db.Where(w => w.客戶名稱 == 客戶資料.客戶名稱
-                    && w.是否已刪除 == true);
-                if (checkexists.Any())
-                {
-                    var existdata = checkexists.Single();
-                    existdata.是否已刪除 = false;
-                    existdata.Email = 客戶資料.Email;
-                    existdata.地址 = 客戶資料.地址;
-                    existdata.客戶名稱 = 客戶資料.客戶名稱;
-                    existdata.統一編號 = 客戶資料.統一編號;
-                    existdata.傳真 = 客戶資料.傳真;
-                    existdata.電話 = 客戶資料.電話;
-                }
-                else
-                {
-                    db.Add(客戶資料);
-                }
-
+                db.Add(客戶資料);
                 db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-
+            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "客戶分類ID", "客戶分類");
             return View(客戶資料);
         }
 
@@ -136,26 +122,7 @@ namespace CRM.Controllers
             try
             {
                 客戶資料 客戶資料 = db.Get(id);
-
-                if (客戶資料.客戶聯絡人.Any())
-                {
-                    foreach (var 聯絡人 in 客戶資料.客戶聯絡人.Where(w => w.是否已刪除 == false))
-                    {
-                        聯絡人.是否已刪除 = true;
-                        db.UnitOfWork.Context.Entry(聯絡人).State = EntityState.Modified;
-                    }
-                }
-                if (客戶資料.客戶銀行資訊.Any())
-                {
-                    foreach (var 客戶銀行 in 客戶資料.客戶銀行資訊.Where(w => w.是否已刪除 == false))
-                    {
-                        客戶銀行.是否已刪除 = true;
-                        db.UnitOfWork.Context.Entry(客戶銀行).State = EntityState.Modified;
-                    }
-                }
-
-                客戶資料.是否已刪除 = true;
-                db.UnitOfWork.Context.Entry(客戶資料).State = EntityState.Modified;
+                db.Delete(客戶資料);
                 db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
