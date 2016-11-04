@@ -21,14 +21,14 @@ namespace CRM.Controllers
         }
 
         // GET: CustomerContactManagement
-        public ActionResult Index(int? id,string returnUrl,string returnTitle)
+        public ActionResult Index(int? id, string returnUrl, string returnTitle)
         {
             if (id.HasValue)
             {
                 ViewBag.ReturnUrl = returnUrl;
                 ViewBag.ReturnTitle = returnTitle;
                 var 客戶聯絡人byId = db.All()
-                    .Where(w=>w.客戶資料.Id==id);
+                    .Where(w => w.客戶資料.Id == id);
 
                 return View(客戶聯絡人byId.ToList());
             }
@@ -55,7 +55,7 @@ namespace CRM.Controllers
         // GET: CustomerContactManagement/Create
         public ActionResult Create()
         {
-            ViewBag.客戶Id = new SelectList(db.Where(w => w.客戶資料.是否已刪除 == false).OrderBy(o=>o.客戶資料.客戶名稱), "Id", "客戶名稱");
+            ViewBag.客戶Id = new SelectList(db.Where(w => w.客戶資料.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱");
             return View();
         }
 
@@ -73,7 +73,7 @@ namespace CRM.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o=>o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶聯絡人.客戶Id);
+            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶聯絡人.客戶Id);
             return View(客戶聯絡人);
         }
 
@@ -131,28 +131,21 @@ namespace CRM.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             客戶聯絡人 客戶聯絡人 = db.Get(id);
-           // db.客戶聯絡人.Remove(客戶聯絡人);
+            // db.客戶聯絡人.Remove(客戶聯絡人);
             客戶聯絡人.是否已刪除 = true;
             db.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Filiter(string searchFor)
+        public ActionResult Filiter(string searchFor, string jobTitle)
         {
-            int idsearch = 0;
+            ViewBag.searchFor = searchFor;
+            ViewBag.jobTitle = jobTitle;
+            var result = db.Filiter(searchFor);
+            result = db.FiliterByJobTitleOnly(jobTitle);
 
-            if (int.TryParse(searchFor, out idsearch) == false)
-                idsearch = 0;
-
-            return View("Index", db.Where(w => (
-                w.Id == idsearch ||
-                w.Email.Contains(searchFor) ||
-                w.手機.Contains(searchFor) ||
-                w.姓名.Contains(searchFor) ||
-                w.電話.Contains(searchFor) ||
-                w.職稱.Contains(searchFor))
-                && w.是否已刪除 == false).OrderBy(o => o.客戶Id).ToList());
+            return View("Index", result.ToList());
         }
 
         protected override void Dispose(bool disposing)

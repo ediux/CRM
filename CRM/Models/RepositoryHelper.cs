@@ -4,6 +4,11 @@ namespace CRM.Models
 {
 	public static class RepositoryHelper
 	{
+	    public static void Update<T>(this IRepositoryBase<T> Repo,T entity) where T :class
+        {
+            Repo.UnitOfWork.Context.Entry<T>(entity).State = System.Data.Entity.EntityState.Modified;
+        }
+
 		public static IUnitOfWork GetUnitOfWork()
 		{
 			return new EFUnitOfWork();

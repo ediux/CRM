@@ -16,17 +16,22 @@
            }
         </p>
     </div>
-    <div class="pull-right">
-        @using (Html.BeginForm("Filiter", "CustomerDataManagement", FormMethod.Post, new { @class = "form-horizontal" }))
+    <div class="pull-right col-md-6">
+        @using (Html.BeginForm("Filiter", "CustomerContactManagement", FormMethod.Post, new { @class = "form-inline" }))
         {
             @Html.AntiForgeryToken()
             <div class="form-group">
-                <label class="control-label col-md-3">@ReslangMUI.Languages.Search:</label>
-                <div class="col-md-4">
-                    @Html.TextBox("searchFor", "", new { htmlAttributes = new { @class = "form-control" } })
-                </div>
+                <label for="job_title">職稱:</label>
+                    @Html.TextBox("jobTitle",null, new { @class = "form-control", @id = "job_title" })
             </div>
+            <div class="form-group">
+                <label for="searchFor">@ReslangMUI.Languages.Search:</label>
+                    @Html.TextBox("searchFor", null, new { @class = "form-control", @id="searchFor" })
+            </div>
+            <button type="submit" class="btn btn-default">@Resources.Languages.Search</button>
+       
         }
+
     </div>
 </div>
 <table class="table">

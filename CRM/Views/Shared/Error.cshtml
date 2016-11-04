@@ -2,8 +2,12 @@
 
 @{
     ViewBag.Title = "錯誤";
+    var ex = Model.Exception;
 }
 
 <h1 class="text-danger">錯誤。</h1>
 <h2 class="text-danger">處理您的要求時發生錯誤。</h2>
+
+<h3>@ex.Message</h3>
+<pre>@ex.StackTrace</pre>
 

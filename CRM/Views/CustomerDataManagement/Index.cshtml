@@ -12,16 +12,19 @@
             @Html.ActionLink(ReslangMUI.Languages.Create_New, "Create") | @Html.ActionLink(ReslangMUI.Languages.Summary, "Summary")
         </p>
     </div>
-    <div class="pull-right">
-        @using (Html.BeginForm("Filiter", "CustomerDataManagement", FormMethod.Post, new { @class = "form-horizontal" }))
+    <div class="pull-right col-md-5">
+        @using (Html.BeginForm("Filiter", "CustomerDataManagement", FormMethod.Post, new { @class = "form-inline col-md-12", @id = "Filiter" }))
         {
             @Html.AntiForgeryToken()
             <div class="form-group">
-                <label class="control-label col-md-3">@ReslangMUI.Languages.Search:</label>
-                <div class="col-md-4">
-                    @Html.TextBox("searchFor", "", new { htmlAttributes = new { @class = "form-control" } })
-                </div>
+                <label for="classFiliter">分類:</label>
+                    @Html.DropDownList("searchFor", null, new { @class = "form-control", @id = "classFiliter" })
             </div>
+            <div class="form-group ">
+                <label for="searchFor">@ReslangMUI.Languages.Search:</label>                
+                    @Html.TextBox("searchFor", "", new { @class = "form-control" , @id="searchFor"})                
+            </div>
+            @Html.ActionLink("匯出", "Export", new { searchFor = (string)ViewBag.Filiter },new {@class="btn btn-success" })
         }
     </div>
 </div>
@@ -92,6 +95,8 @@
     @Scripts.Render("~/bundles/bs/datatable")
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#classFiliter').change(function () { setTimeout($('#Filiter').submit(), 5000); });
+
             $('.table').DataTable({
                 "paging": true,
                 "ordering": true,

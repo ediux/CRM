@@ -7,7 +7,8 @@ namespace CRM
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            filters.Add(new HandleErrorAttribute());
+            filters.Add(new HandleErrorAttribute(), 1);
+            filters.Add(new PerformanceAnalysisFiliterAttribute(), 0);
         }
     }
 }

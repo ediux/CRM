@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using CRM.Models;
+using System.IO;
 
 namespace CRM.Controllers
 {
@@ -26,6 +27,8 @@ namespace CRM.Controllers
         // GET: CustomerDataManagement
         public ActionResult Index()
         {
+            ViewBag.searchFor = new SelectList(db_class.All().ToList(), "客戶分類", "客戶分類");
+            ViewBag.Filiter = "";
             return View(db.Where(w => w.是否已刪除 == false).ToList());
         }
 
@@ -137,7 +140,7 @@ namespace CRM.Controllers
         }
 
         public ActionResult Summary()
-        {
+        {            
             return View(db_vw.All().ToList());
         }
 
@@ -145,21 +148,9 @@ namespace CRM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Filiter(string searchFor)
         {
-            int idsearch = 0;
-
-            if (int.TryParse(searchFor, out idsearch) == false)
-                idsearch = 0;
-
-            return View("Index", db.Where(w => (
-                w.Id == idsearch ||
-                w.Email.Contains(searchFor) ||
-                w.客戶名稱.Contains(searchFor) ||
-                w.地址.Contains(searchFor) ||
-                w.客戶名稱.Contains(searchFor) ||
-                w.統一編號.Contains(searchFor) ||
-                w.傳真.Contains(searchFor) ||
-                w.電話.Contains(searchFor))
-                && w.是否已刪除 == false).ToList());
+            ViewBag.searchFor = new SelectList(db_class.All().ToList(), "客戶分類", "客戶分類");
+            ViewBag.Filiter = searchFor;
+            return View("Index", db.Filiter(searchFor).ToList());
         }
 
         [HttpPost]
@@ -173,10 +164,17 @@ namespace CRM.Controllers
 
             return View("Summary", db_vw.Where(w => (
                 w.Id == idsearch ||
-                w.客戶名稱.Contains(searchFor) ||
                 w.客戶名稱.Contains(searchFor))).ToList());
         }
 
+        public ActionResult Export(string searchFor)
+        {
+
+            //filewriter.Write()
+            ViewBag.Filiter = searchFor;
+            db.Export(searchFor);
+            return File(Server.MapPath("~/CustomData.xlsx"), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");    //File(db.Export(searchFor), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)

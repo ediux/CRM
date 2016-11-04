@@ -22,6 +22,7 @@ namespace CRM.Models
     
         public int Id { get; set; }
         public string 客戶分類 { get; set; }
+        public bool Void { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<客戶資料> 客戶資料 { get; set; }

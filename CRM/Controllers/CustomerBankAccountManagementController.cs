@@ -148,19 +148,7 @@ namespace CRM.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Filiter(string searchFor)
         {
-            int idsearch = 0;
-
-            if (int.TryParse(searchFor, out idsearch) == false)
-                idsearch = 0;
-
-            return View("Index", db.Where(w => (
-                w.Id == idsearch ||
-                w.分行代碼 == idsearch ||
-                w.帳戶名稱.Contains(searchFor) ||
-                w.帳戶號碼.Contains(searchFor) ||
-                w.銀行代碼 == idsearch ||
-                w.銀行名稱.Contains(searchFor))
-                && w.是否已刪除 == false).OrderBy(o => o.Id).ToList());
+            return View("Index", db.Filiter(searchFor).ToList());
         }
 
         protected override void Dispose(bool disposing)

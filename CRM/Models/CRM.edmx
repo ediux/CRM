@@ -11,6 +11,7 @@
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="客戶分類" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Void" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="客戶資料">
           <Key>
@@ -235,6 +236,7 @@
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="客戶分類" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="客戶資料" Relationship="CRMModel.FK_客戶資料_客戶分類對照表" FromRole="客戶分類對照表" ToRole="客戶資料" />
+          <Property Name="Void" Type="Boolean" Nullable="false" />
         </EntityType>
         <Association Name="FK_客戶資料_客戶分類對照表">
           <End Type="CRMModel.客戶分類對照表" Role="客戶分類對照表" Multiplicity="0..1" />
@@ -310,6 +312,7 @@
           <EntitySetMapping Name="客戶分類對照表">
             <EntityTypeMapping TypeName="CRMModel.客戶分類對照表">
               <MappingFragment StoreEntitySet="客戶分類對照表">
+                <ScalarProperty Name="Void" ColumnName="Void" />
                 <ScalarProperty Name="客戶分類" ColumnName="客戶分類" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
