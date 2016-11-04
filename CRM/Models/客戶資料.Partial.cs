@@ -40,8 +40,11 @@ namespace CRM.Models
         public string Email { get; set; }
         [Required]
         public bool 是否已刪除 { get; set; }
-    
+
+        public Nullable<int> 客戶分類ID { get; set; }
+
         public virtual ICollection<客戶銀行資訊> 客戶銀行資訊 { get; set; }
         public virtual ICollection<客戶聯絡人> 客戶聯絡人 { get; set; }
+        public virtual 客戶分類對照表 客戶分類對照表 { get; set; }
     }
 }
