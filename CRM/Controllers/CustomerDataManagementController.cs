@@ -47,7 +47,8 @@ namespace CRM.Controllers
         // GET: CustomerDataManagement/Create
         public ActionResult Create()
         {
-            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "客戶分類ID", "客戶分類");
+            
+            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "Id", "客戶分類");
             return View(new 客戶資料());
         }
 
@@ -64,7 +65,7 @@ namespace CRM.Controllers
                 db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "客戶分類ID", "客戶分類");
+            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "Id", "客戶分類");
             return View(客戶資料);
         }
 
@@ -80,6 +81,7 @@ namespace CRM.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "Id", "客戶分類");
             return View(客戶資料);
         }
 
@@ -96,6 +98,7 @@ namespace CRM.Controllers
                 db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
+            ViewBag.客戶分類ID = new SelectList(db_class.All().ToList(), "客戶分類ID", "客戶分類");
             return View(客戶資料);
         }
 
