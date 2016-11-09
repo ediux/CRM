@@ -40,7 +40,8 @@ namespace CRM.Models
         public string Email { get; set; }
         [Required]
         public bool 是否已刪除 { get; set; }
-
+        [UIHint("CustomerClassificationDropDownList")]
+        [Display(Name ="客戶分類")]
         public Nullable<int> 客戶分類ID { get; set; }
 
         public virtual ICollection<客戶銀行資訊> 客戶銀行資訊 { get; set; }

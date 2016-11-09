@@ -1,0 +1,6 @@
+﻿@{
+    var repo = CRM.Models.RepositoryHelper.Get客戶分類對照表Repository();
+    CRM.Models.客戶分類對照表 cc = repo.Get(Model);
+    var showtext = (cc != null) ? cc.客戶分類 : null;
+}
+@showtext??""

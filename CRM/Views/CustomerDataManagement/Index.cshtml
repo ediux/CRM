@@ -6,28 +6,31 @@
 
 <h2>@ReslangMUI.Languages.CustomerDataManagement</h2>
 
+<hr />
 <div class="row">
-    <div class="pull-left">
+    <div class="left col-xs-12 col-md-6">
         <p>
             @Html.ActionLink(ReslangMUI.Languages.Create_New, "Create") | @Html.ActionLink(ReslangMUI.Languages.Summary, "Summary")
         </p>
     </div>
-    <div class="pull-right col-md-5">
+    <div class="right col-xs-12 col-md-6">
         @using (Html.BeginForm("Filiter", "CustomerDataManagement", FormMethod.Post, new { @class = "form-inline col-md-12", @id = "Filiter" }))
         {
             @Html.AntiForgeryToken()
             <div class="form-group">
                 <label for="classFiliter">分類:</label>
-                    @Html.DropDownList("searchFor", null, new { @class = "form-control", @id = "classFiliter" })
+                @Html.DropDownList("searchFor", null, new { @class = "form-control", @id = "classFiliter" })
             </div>
-            <div class="form-group ">
-                <label for="searchFor">@ReslangMUI.Languages.Search:</label>                
-                    @Html.TextBox("searchFor", "", new { @class = "form-control" , @id="searchFor"})                
-            </div>
-            @Html.ActionLink("匯出", "Export", new { searchFor = (string)ViewBag.Filiter },new {@class="btn btn-success" })
+            <div class="form-group ">                
+            <label for="searchFor">@ReslangMUI.Languages.Search:</label>
+            @Html.TextBox("searchFor", "", new { @class = "form-control", @id = "searchFor" })
+        </div>
+
         }
+        @Html.ActionLink("匯出", "Export", new { searchFor = (string)ViewBag.Filiter }, new { @class = "btn btn-success" })
     </div>
 </div>
+<hr />
 
 
 <table class="table">
@@ -85,6 +88,7 @@
         }
     </tbody>
 </table>
+
 @section pagecss{
 
     @Styles.Render("~/Content/bs/datatable")
@@ -97,7 +101,7 @@
         $(document).ready(function () {
             $('#classFiliter').change(function () { setTimeout($('#Filiter').submit(), 5000); });
 
-            $('.table').DataTable({
+            @*$('.table').DataTable({
                 "paging": true,
                 "ordering": true,
                 "info": true,
@@ -117,7 +121,7 @@
                         "sLast": "@ReslangMUI.Languages.oPaginate_sLast"
                     }
                 }
-            });
+            });*@
         });
     </script>
 }

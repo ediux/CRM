@@ -1,98 +1,106 @@
-﻿@model IEnumerable<CRM.Models.客戶銀行資訊>
+﻿@model CRMIndexViewModel<CRM.Models.客戶銀行資訊>
 
 @{
     ViewBag.Title = ReslangMUI.Languages.CustomerBankAccountManagement;
 }
 
 <h2>@ViewBag.Title</h2>
-
 <div class="row">
     <div class="pull-left">
         <p>
-            @Html.ActionLink(ReslangMUI.Languages.Create_New, "Create") @if (ViewBag.ReturnUrl != null)
+            @Html.ActionLink(ReslangMUI.Languages.Create_New, "Create") @if (Model.ReturnUrl != null)
             {
-                @Html.Raw("|") <a href="@ViewBag.ReturnUrl">@if(ViewBag.returnTitle!=null) { @Html.Raw((string)ViewBag.returnTitle) } else{ @Html.Raw(ReslangMUI.Languages.Back_to) }</a>
+                @Html.Raw("|") <a href="@ViewBag.ReturnUrl">
+                    @if (ViewBag.returnTitle != null)
+                { @Html.Raw((string)ViewBag.returnTitle) }
+                else
+                { @Html.Raw(ReslangMUI.Languages.Back_to) }
+                </a>
             }
         </p>
     </div>
     <div class="pull-right">
-        @using (Html.BeginForm("Filiter", "CustomerDataManagement", FormMethod.Post, new { @class = "form-horizontal" }))
-        {
+        @using (Html.BeginForm("Filiter", "CustomerBankAccountManagement", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
             @Html.AntiForgeryToken()
             <div class="form-group">
-                <label class="control-label col-md-3">搜尋:</label>
+                @Html.LabelFor(model => model.searchFor,
+               new { @for = Html.IdFor(p => p.searchFor).ToString(), @class = "control-label col-md-3" })               
                 <div class="col-md-4">
-                    @Html.TextBox("searchFor", "", new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.TextBoxFor(model=>model.searchFor, new { @id = Html.IdFor(p => p.searchFor).ToString(), @class = "form-control" })
                 </div>
             </div>
         }
     </div>
 </div>
-<table class="table" id="t">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.銀行名稱)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.銀行代碼)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.分行代碼)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.帳戶名稱)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.帳戶號碼)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.客戶資料.客戶名稱)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="row">
+    <table class="table" id="t">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.銀行名稱)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.銀行代碼)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.分行代碼)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.帳戶名稱)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.帳戶號碼)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.客戶資料.客戶名稱)
-                </td>
-                <td>
-                    @Html.ActionLink(ReslangMUI.Languages.Edit, "Edit", new { id = item.Id }) |
-                    @Html.ActionLink(ReslangMUI.Languages.Delete, "Delete", new { id = item.Id })
-                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstRow.銀行名稱)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstRow.銀行代碼)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstRow.分行代碼)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstRow.帳戶名稱)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstRow.帳戶號碼)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstRow.客戶資料.客戶名稱)
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.銀行名稱)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.銀行代碼)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.分行代碼)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.帳戶名稱)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.帳戶號碼)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.客戶資料.客戶名稱)
+                    </td>
+                    <td>
+                        @Html.ActionLink(ReslangMUI.Languages.Edit, "Edit", new { id = item.Id }) |
+                        @Html.ActionLink(ReslangMUI.Languages.Delete, "Delete", new { id = item.Id })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.PagedListPager(Model, p => Url.Action("Index", new { pageSize = Model.PageSize, pageIndex = p }))
+</div>
+
 
 @section pagecss{
     @Styles.Render("~/Content/bs/datatable")
 }
 
 @section scripts{
-    @Scripts.Render("~/bundles/jq/datatable")
-    @Scripts.Render("~/bundles/bs/datatable")
+
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.table').DataTable({
+            @*$('.table').DataTable({
                 "paging": true,
                 "ordering": true,
                 "info": true,
@@ -112,7 +120,7 @@
                         "sLast": "@ReslangMUI.Languages.oPaginate_sLast"
                     }
                 }
-            });
+            });*@
         });
     </script>
 }

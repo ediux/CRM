@@ -1,0 +1,8 @@
+﻿@model int?
+@{           
+    var listsource = ViewData[ViewData.TemplateInfo.HtmlFieldPrefix];
+    //var DDL = new SelectList(ViewBag.客戶分類ID, "Value", "Text", (Model==null)? 0 : (Model.HasValue)? Model.Value:0 );
+    var DDL = new SelectList(listsource as System.Collections.IEnumerable, "Value", "Text", (Model == null) ? 0 : (Model.HasValue) ? Model.Value : 0);
+
+}
+@Html.DropDownList("", DDL,"請選擇...", htmlAttributes: new { @class = "form-control" })

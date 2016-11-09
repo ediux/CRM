@@ -1,7 +1,10 @@
-﻿@model IEnumerable<CRM.Models.客戶分類對照表>
+﻿@using PagedList
+@using PagedList.Mvc
+@model IEnumerable<CRM.Models.客戶分類對照表>
 
 @{
     ViewBag.Title = "Index";
+    var data = Model as IPagedList;
 }
 
 <h2>Index</h2>
@@ -31,3 +34,4 @@
 }
 
 </table>
+@Html.PagedListPager(data,p=>Url.Action("Index",new { pageIndex=p, pageSize = data.PageSize }))
