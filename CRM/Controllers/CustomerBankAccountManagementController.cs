@@ -7,6 +7,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using CRM.Models;
+using PagedList;
+using CRM.Models.ViewModel;
 
 namespace CRM.Controllers
 {
@@ -21,25 +23,23 @@ namespace CRM.Controllers
         }
 
         // GET: CustomerBankAccountManagement
-        public ActionResult Index(int? id, string returnUrl,string returnTitle)
+        public ActionResult Index(int? id, string returnUrl, string returnTitle, int? pageIndex, int? pageSize)
         {
+            var 客戶銀行資訊 = db.Where(w => w.是否已刪除 == false)
+                .Include(客 => 客.客戶資料).OrderBy(o => o.Id);
+
             if (id.HasValue)
             {
-                ViewBag.ReturnUrl = returnUrl;
-                ViewBag.ReturnTitle = returnTitle;
-                var 客戶銀行資訊byId = db.Where(w => w.是否已刪除 == false 
-                    && w.客戶Id == id)
-                    .Include(客 => 客.客戶資料)
+                var 客戶銀行資訊byId = 客戶銀行資訊.Where(w => w.客戶Id == id)                    
                     .OrderBy(o => o.Id);
 
-                return View(客戶銀行資訊byId.ToList());
+                return View(new CRMIndexViewModel<客戶銀行資訊>(客戶銀行資訊byId, pageIndex ?? 1, pageSize ?? 25) {
+                    ReturnTitle = returnTitle,
+                    ReturnUrl = returnUrl
+                });
             }
-
-            var 客戶銀行資訊 = db.Where(w => w.是否已刪除 == false)
-                .OrderBy(o => o.Id)
-                .Include(客 => 客.客戶資料);
-
-            return View(客戶銀行資訊.ToList());
+           
+            return View(new CRMIndexViewModel< 客戶銀行資訊>(客戶銀行資訊 ,pageIndex ?? 1, pageSize ?? 25));
         }
 
         // GET: CustomerBankAccountManagement/Details/5
@@ -146,9 +146,9 @@ namespace CRM.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Filiter(string searchFor)
+        public ActionResult Filiter(string searchFor ,int? pageIndex, int? pageSize)
         {
-            return View("Index", db.Filiter(searchFor).ToList());
+            return View("Index", new CRMIndexViewModel<客戶銀行資訊>(db.Filiter(searchFor).AsQueryable(),pageIndex??1,pageSize??25));
         }
 
         protected override void Dispose(bool disposing)

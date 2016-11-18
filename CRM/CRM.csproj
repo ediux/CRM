@@ -200,6 +200,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AddCustomDataRelationSelectListAttribute.cs" />
     <Compile Include="Controllers\CustomerBankAccountManagementController.cs" />
     <Compile Include="Controllers\CustomerClassificationController.cs" />
     <Compile Include="Controllers\CustomerContactManagementController.cs" />
@@ -246,6 +247,7 @@
     <Compile Include="Models\RepositoryHelper.cs">
       <DependentUpon>Edward.IRepository.EF6.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ViewModel\CRMIndexViewModel.cs" />
     <Compile Include="Models\vw_CustomerSummary.cs">
       <DependentUpon>CRM.tt</DependentUpon>
     </Compile>
@@ -432,6 +434,10 @@
     <Content Include="Views\CustomerClassification\Details.cshtml" />
     <Content Include="Views\CustomerClassification\Edit.cshtml" />
     <Content Include="Views\CustomerClassification\Index.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\CustomerClassificationDropDownList.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\CustomerClassificationDropDownList.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\DropDownList.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\DropDownList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

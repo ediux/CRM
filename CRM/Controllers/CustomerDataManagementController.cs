@@ -47,7 +47,7 @@ namespace CRM.Controllers
             return View(客戶資料);
         }
 
-        // GET: CustomerDataManagement/Create
+        // GET: CustomerDataManagement/Create        
         public ActionResult Create()
         {
             

@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using CRM.Models;
+using PagedList;
 
 namespace CRM.Controllers
 {
@@ -21,18 +22,19 @@ namespace CRM.Controllers
         }
 
         // GET: CustomerContactManagement
-        public ActionResult Index(int? id, string returnUrl, string returnTitle)
+        public ActionResult Index(int? id, string returnUrl, string returnTitle, int? pageIndex, int? pagesize)
         {
             if (id.HasValue)
             {
                 ViewBag.ReturnUrl = returnUrl;
                 ViewBag.ReturnTitle = returnTitle;
                 var 客戶聯絡人byId = db.All()
-                    .Where(w => w.客戶資料.Id == id);
+                    .Where(w => w.客戶資料.Id == id)
+                    .OrderBy(o => o.Id);
 
-                return View(客戶聯絡人byId.ToList());
+                return View(客戶聯絡人byId.ToPagedList(pageIndex ?? 1, pagesize ?? 25));
             }
-            var 客戶聯絡人 = db.All().ToList();
+            var 客戶聯絡人 = db.All().OrderBy(o => o.Id).ToPagedList(pageIndex ?? 1, pagesize ?? 25);
             return View(客戶聯絡人);
         }
 
@@ -53,10 +55,11 @@ namespace CRM.Controllers
         }
 
         // GET: CustomerContactManagement/Create
+        [AddCustomDataRelationSelectList]
         public ActionResult Create()
         {
-            ViewBag.客戶Id = new SelectList(db.Where(w => w.客戶資料.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱");
-            return View();
+
+            return View(new 客戶聯絡人());
         }
 
         // POST: CustomerContactManagement/Create
@@ -64,6 +67,7 @@ namespace CRM.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AddCustomDataRelationSelectList]
         public ActionResult Create([Bind(Include = "Id,客戶Id,職稱,姓名,Email,手機,電話,是否已刪除")] 客戶聯絡人 客戶聯絡人)
         {
             if (ModelState.IsValid)
@@ -73,11 +77,11 @@ namespace CRM.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶聯絡人.客戶Id);
             return View(客戶聯絡人);
         }
 
         // GET: CustomerContactManagement/Edit/5
+        [AddCustomDataRelationSelectList]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -89,7 +93,7 @@ namespace CRM.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶聯絡人.客戶Id);
+
             return View(客戶聯絡人);
         }
 
@@ -98,6 +102,7 @@ namespace CRM.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AddCustomDataRelationSelectList]
         public ActionResult Edit([Bind(Include = "Id,客戶Id,職稱,姓名,Email,手機,電話,是否已刪除")] 客戶聯絡人 客戶聯絡人)
         {
             if (ModelState.IsValid)
@@ -106,7 +111,7 @@ namespace CRM.Controllers
                 db.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-            ViewBag.客戶Id = new SelectList(db.Where(w => w.是否已刪除 == false).OrderBy(o => o.客戶資料.客戶名稱), "Id", "客戶名稱", 客戶聯絡人.客戶Id);
+
             return View(客戶聯絡人);
         }
 
@@ -131,8 +136,7 @@ namespace CRM.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             客戶聯絡人 客戶聯絡人 = db.Get(id);
-            // db.客戶聯絡人.Remove(客戶聯絡人);
-            客戶聯絡人.是否已刪除 = true;
+            db.Delete(客戶聯絡人);
             db.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }

@@ -8,6 +8,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using CRM.Models;
+using PagedList;
 
 namespace CRM.Controllers
 {
@@ -16,9 +17,9 @@ namespace CRM.Controllers
         private 客戶分類對照表Repository db = RepositoryHelper.Get客戶分類對照表Repository();
 
         // GET: CustomerClassification
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(int? pageIndex, int? pagesize)
         {
-            return View(await db.All().ToListAsync());
+            return View(await Task.Run(() => db.All().OrderBy(o => o.Id).ToPagedList(pageIndex ?? 1, pagesize ?? 25)));
         }
 
         // GET: CustomerClassification/Details/5
@@ -82,8 +83,8 @@ namespace CRM.Controllers
         public async Task<ActionResult> Edit([Bind(Include = "Id,客戶分類")] 客戶分類對照表 客戶分類對照表)
         {
             if (ModelState.IsValid)
-            {
-                db.UnitOfWork.Context.Entry(客戶分類對照表).State = EntityState.Modified;
+            {                
+                db.Update(客戶分類對照表);
                 await db.UnitOfWork.CommitAsync();
                 return RedirectToAction("Index");
             }
