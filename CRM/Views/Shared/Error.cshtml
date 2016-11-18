@@ -2,12 +2,31 @@
 
 @{
     ViewBag.Title = "錯誤";
-    var ex = Model.Exception;
 }
 
 <h1 class="text-danger">錯誤。</h1>
 <h2 class="text-danger">處理您的要求時發生錯誤。</h2>
+@{
+    if (Model != null)
+    {
+        var ex = Model.Exception;
+        <h3>@ex.Message</h3>
+        if (ex.InnerException != null)
+        {
+            @ex.InnerException.InnerException.Message
+        }
+        <pre>@ex.StackTrace</pre>
+    }
+    else
+    {
+        var ex = Server.GetLastError();
+        <h3>@ex.Message</h3>
+        if (ex.InnerException != null)
+        {
+            @ex.InnerException.InnerException.Message
+        }
+        <pre>@ex.StackTrace</pre>
+    }
+}
 
-<h3>@ex.Message</h3>
-<pre>@ex.StackTrace</pre>
 

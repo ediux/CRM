@@ -1,10 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Data.Entity;
-using NPOI;
-using NPOI.HSSF.UserModel;
 using NPOI.XSSF.UserModel;
 using NPOI.SS.UserModel;
 using System.IO;
@@ -83,6 +80,10 @@ namespace CRM.Models
 
         public IEnumerable<客戶資料> Filiter(string searchFor)
         {
+            if (searchFor == null)
+            {
+                searchFor = "";
+            }
             int idsearch = 0;
 
             if (int.TryParse(searchFor, out idsearch) == false)
@@ -100,7 +101,7 @@ namespace CRM.Models
                 w.電話.Contains(searchFor));
         }
 
-        public Stream Export(string filiter)
+        public Stream Export(string filiter, string[] outputfields)
         {
             var exportdatasource = Filiter(filiter).ToList();
 
@@ -113,39 +114,94 @@ namespace CRM.Models
 
             Type currtype = typeof(客戶資料);
 
-            var props = currtype.GetProperties();
-
             ws.CreateRow(0);//第一行為欄位名稱
             Dictionary<int, string> fields = new Dictionary<int, string>();
 
-            int coli = 0;
             //掃描欄位名稱
-            foreach (var prop in props)
+            for (int coli = 0; coli < outputfields.Length; coli++)
             {
-                ws.GetRow(0).CreateCell(coli).SetCellValue(prop.Name);
-                fields.Add(coli, prop.Name);
-                coli++;
+                // ws.GetRow(0).CreateCell(coli).SetCellValue(prop.Name);
+                if (outputfields[coli] == null)
+                    continue;
+
+                fields.Add(coli, outputfields[coli]);
+                ws.GetRow(0).CreateCell(coli).SetCellValue(outputfields[coli]);
+
             }
 
-            int row = 1;
-            foreach(var rows in exportdatasource)
+            for (int rowi = 0; rowi < exportdatasource.Count; rowi++)
             {
-                ws.CreateRow(row);
-                for(int i = 0; i < fields.Keys.Count; i++)
+                IRow row = ws.CreateRow(1 + rowi);
+                Type rowtype = exportdatasource[rowi].GetType();
+
+                for (int i = 0; i < fields.Keys.Count; i++)
                 {
-                    Type rowtype = rows.GetType();
-                    var propinfo = rowtype.GetProperty(fields[i]);
-                    if (propinfo != null)
+                    if(fields[i]== "客戶分類")
                     {
-                        object val = propinfo.GetValue(rows);
-                        if (val != null)
+                        var propinfoc = rowtype.GetProperty("客戶分類對照表");
+
+                        if (propinfoc == null)
+                            continue;
+
+                        object value = propinfoc.GetValue(exportdatasource[rowi]);
+                        if (value == null)
+                            continue;
+
+                        var navproptype = value.GetType();
+                        if (navproptype == null)
+                            continue;
+
+                        var navprop = navproptype.GetProperty(fields[i]);
+                        if (navprop == null)
+                            continue;
+
+                        row.CreateCell(i).SetCellValue((string)navprop.GetValue(value));
+                        continue;
+                    }
+
+                    var propinfo = rowtype.GetProperty(fields[i]);
+
+                    if (propinfo == null)
+                        continue;
+       
+                        if (propinfo.PropertyType == typeof(bool))
                         {
-                            ws.GetRow(row).CreateCell(i).SetCellValue(val.ToString());
+                            object value = propinfo.GetValue(exportdatasource[rowi]);
+                            if (value == null)
+                                continue;
+
+                            row.CreateCell(i).SetCellValue((bool)value);
+                            continue;
                         }
-                        
-                    }                    
+                        if (propinfo.PropertyType == typeof(DateTime))
+                        {
+                            object value = propinfo.GetValue(exportdatasource[rowi]);
+                            if (value == null)
+                                continue;
+
+                            row.CreateCell(i).SetCellValue((DateTime)value);
+                            continue;
+                        }
+                        if (propinfo.PropertyType == typeof(double) || 
+                            propinfo.PropertyType==  typeof(float) ||
+                            propinfo.PropertyType ==typeof(decimal))
+                        {
+                            object value = propinfo.GetValue(exportdatasource[rowi]);
+                            if (value == null)
+                                continue;
+
+                            row.CreateCell(i).SetCellValue((double)value);
+                            continue;
+                        }
+
+                        object value2 = propinfo.GetValue(exportdatasource[rowi]);
+                        if (value2 == null)
+                            continue;
+                        row.CreateCell(i).SetCellValue((string)value2);
+                 
+                    
                 }
-                row++;                          
+                
             }
 
             FileStream file = new FileStream(Path.Combine(HttpRuntime.AppDomainAppPath, "CustomData.xlsx"), FileMode.Create);
@@ -158,6 +214,6 @@ namespace CRM.Models
     {
         IEnumerable<客戶資料> Filiter(string searchFor);
 
-        System.IO.Stream Export( string filiter);
+        Stream Export(string filiter, string[] outputfields);
     }
 }

@@ -60,7 +60,7 @@ namespace CRM.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除")] 客戶資料 客戶資料)
+        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除,客戶分類ID")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
@@ -93,7 +93,7 @@ namespace CRM.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除")] 客戶資料 客戶資料)
+        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除,客戶分類ID")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
@@ -172,8 +172,9 @@ namespace CRM.Controllers
 
             //filewriter.Write()
             ViewBag.Filiter = searchFor;
-            db.Export(searchFor);
-            return File(Server.MapPath("~/CustomData.xlsx"), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");    //File(db.Export(searchFor), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            db.Export(searchFor,new string[] { "客戶名稱", "統一編號", "電話", "傳真", "地址", "Email", "客戶分類" });
+
+            return File(Server.MapPath("~/CustomData.xlsx"), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","Export.xlsx");    //File(db.Export(searchFor), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
         protected override void Dispose(bool disposing)
         {
